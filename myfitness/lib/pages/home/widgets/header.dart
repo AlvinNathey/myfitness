@@ -1,5 +1,63 @@
 import 'package:flutter/material.dart';
 
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Use the left Drawer instead of endDrawer
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Color(0xff18b0e8),
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () {
+                // Handle profile navigation here
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.devices),
+              title: const Text('Add Devices'),
+              onTap: () {
+                // Handle add devices functionality here
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.data_usage),
+              title: const Text('Data Sources'),
+              onTap: () {
+                // Handle data sources management here
+              },
+            ),
+          ],
+        ),
+      ),
+      body: Column(
+        children: const [
+          AppHeader(),
+          // You can add other content of your page below this
+          Expanded(child: Center(child: Text('Main Content Here')))
+        ],
+      ),
+    );
+  }
+}
+
 class AppHeader extends StatelessWidget {
   const AppHeader({Key? key}) : super(key: key);
 
@@ -7,7 +65,7 @@ class AppHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 200,
+      height: 100,
       child: Stack(
         children: [
           CustomPaint(
@@ -17,17 +75,25 @@ class AppHeader extends StatelessWidget {
           Positioned(
             top: 20,
             left: 20,
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.menu,
-                color: Colors.white,
-              ),
+            // Wrapping IconButton in a Builder to access the correct context
+            child: Builder(
+              builder: (context) {
+                return IconButton(
+                  onPressed: () {
+                    // Open the left Drawer when the menu icon is pressed
+                    Scaffold.of(context).openDrawer();
+                  },
+                  icon: const Icon(
+                    Icons.menu,
+                    color: Colors.white,
+                  ),
+                );
+              },
             ),
           ),
           const Positioned(
-            top: 35,
-            right: 40,
+            top: 20,
+            right: 120,
             child: CircleAvatar(
               minRadius: 25,
               maxRadius: 25,
@@ -35,8 +101,8 @@ class AppHeader extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: 33,
-            bottom: 20,
+            right: 20,
+            top: 10,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
@@ -49,7 +115,7 @@ class AppHeader extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Michaele',
+                  'Nathey',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

@@ -21,7 +21,18 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/
+    - assets/running.png
+    - assets/outdoor running.jpg
+    - assets/indoor cycling.jpg
+    - assets/outdoor cycling.jpg
+    - assets/rope skipping.jpg
+    - assets/outdoor walking.jpg
+    - assets/gym.png
+    - assets/barbell.jpg
+    - assets/dumbbell.jpg
+    - assets/kettlebell.jpg
+    - assets/smith.jpg
+    - assets/profile.jpg
 
   fonts:
     - family: Roboto
@@ -37,4 +48,3 @@ flutter:
           weight: 700
         - asset: fonts/Roboto-Black.ttf
           weight: 900
- 
