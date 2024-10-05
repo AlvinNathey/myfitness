@@ -150,7 +150,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                   },
                 ),
                 TextField(
-                  decoration: const InputDecoration(labelText: 'Calories Burned'),
+                  decoration: const InputDecoration(labelText: 'Calories (kcal)'),
                   keyboardType: TextInputType.number, // Allow only numbers
                   onChanged: (value) {
                     calories = value;
@@ -161,17 +161,13 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: const Text('Cancel'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
-                if (duration.isNotEmpty && calories.isNotEmpty) {
-                  _recordActivity(selectedWorkout!, duration, calories);
-                  Navigator.of(context).pop(); // Close dialog after recording
-                }
+                // You can implement the logic for saving data later
+                Navigator.of(context).pop(); // Close the dialog
               },
               child: const Text('Record'),
             ),
@@ -181,104 +177,74 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
     );
   }
 
-  void _recordActivity(String name, String duration, String calories) {
-    // Implement logic to store the recent activity
-    print('Recorded Activity: $name, Duration: $duration min, Calories: $calories kcal');
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 20,
-            horizontal: 30,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Current Programs',
-                style: Theme.of(context).textTheme.displayLarge,
-              ),
-            ],
-          ),
-        ),
-        SizedBox(
-          width: double.infinity,
-          height: 100,
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            scrollDirection: Axis.horizontal,
-            itemCount: fitnessPrograms.length,
-            itemBuilder: (context, index) {
-              return Program(
-                program: fitnessPrograms[index],
-                active: fitnessPrograms[index].type == active,
-                onTap: (ProgramType programType) {
-                  _changeProgram(programType);
-                  _showMoreOptions(context, fitnessPrograms[index]);
-                },
-              );
-            },
-            separatorBuilder: (context, index) => const SizedBox(width: 40),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class Program extends StatelessWidget {
-  final FitnessProgram program;
-  final bool active;
-  final Function(ProgramType) onTap;
-
-  const Program({
-    Key? key,
-    required this.program,
-    this.active = false,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        onTap(program.type);
-      },
-      child: Container(
-        height: 80,
-        width: 170,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(
-              active
-                  ? const Color(0xff1ebdf8).withOpacity(.8)
-                  : Colors.white.withOpacity(.8),
-              BlendMode.lighten,
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: Column(
+          children: [
+            Row(
+              children: fitnessPrograms.map((program) {
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      _changeProgram(program.type);
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      height: 45,
+                      decoration: BoxDecoration(
+                        color: active == program.type ? const Color(0xffcff2ff) : null,
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        program.name,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: active == program.type
+                                  ? const Color(0xff202c43)
+                                  : const Color(0xff202c43).withOpacity(0.5),
+                            ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-            image: AssetImage(program.image),
-            fit: BoxFit.cover,
-          ),
-        ),
-        alignment: Alignment.bottomLeft,
-        padding: const EdgeInsets.all(10),
-        child: DefaultTextStyle.merge(
-          style: TextStyle(
-            color: active ? Colors.white : Colors.black,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(program.name),
-            ],
-          ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                _showMoreOptions(context, fitnessPrograms.firstWhere((p) => p.type == active));
+              },
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  image: DecorationImage(
+                    image: active == ProgramType.cardio
+                        ? const AssetImage('assets/running.jpg')
+                        : const AssetImage('assets/weights.jpg'),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.5),
+                      BlendMode.darken,
+                    ),
+                  ),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Record your ${active == ProgramType.cardio ? 'Cardio' : 'Weight'} Workout',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

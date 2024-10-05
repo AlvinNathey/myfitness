@@ -35,6 +35,7 @@ flutter:
     - assets/profile.jpg
     - assets/running.jpg
     - assets/logo.png
+    - assets/weights.jpg
 
   fonts:
     - family: Roboto
