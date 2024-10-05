@@ -51,7 +51,7 @@ class MyHomePage extends StatelessWidget {
         children: const [
           AppHeader(),
           // You can add other content of your page below this
-          Expanded(child: Center(child: Text('Main Content Here')))
+          Expanded(child: Center(child: Text('Main Content Here'))),
         ],
       ),
     );
@@ -73,27 +73,17 @@ class AppHeader extends StatelessWidget {
             size: const Size(double.infinity, 200),
           ),
           Positioned(
-            top: 20,
-            left: 20,
-            // Wrapping IconButton in a Builder to access the correct context
-            child: Builder(
-              builder: (context) {
-                return IconButton(
-                  onPressed: () {
-                    // Open the left Drawer when the menu icon is pressed
-                    Scaffold.of(context).openDrawer();
-                  },
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Colors.white,
-                  ),
-                );
-              },
+            top: 2,
+            left: 10,
+            child: Image.asset(
+              'assets/logo.png', // Replace with your logo image path
+              width: 170, // Adjust width as needed for scaling
+              height: 100, // Adjust height as needed for scaling
             ),
           ),
           const Positioned(
             top: 20,
-            right: 120,
+            right: 90,
             child: CircleAvatar(
               minRadius: 25,
               maxRadius: 25,
@@ -102,7 +92,7 @@ class AppHeader extends StatelessWidget {
           ),
           Positioned(
             right: 20,
-            top: 10,
+            top: 16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
@@ -119,12 +109,12 @@ class AppHeader extends StatelessWidget {
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 26,
+                    fontSize: 16,
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

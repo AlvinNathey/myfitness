@@ -1,47 +1,69 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
-class RecentActivities extends StatelessWidget {
+class RecentActivities extends StatefulWidget {
   const RecentActivities({Key? key}) : super(key: key);
+
+  @override
+  State<RecentActivities> createState() => _RecentActivitiesState();
+}
+
+class _RecentActivitiesState extends State<RecentActivities> {
+  final List<Map<String, String>> activities = [];
+
+  void _addActivity(String name, String duration, String calories) {
+    setState(() {
+      activities.add({
+        'name': name,
+        'duration': duration,
+        'calories': calories,
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Recent Activity', style: Theme.of(context).textTheme.displayLarge),
-          const SizedBox(height: 20),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 10,
-              itemBuilder: (context, index) => const ActivityItem(),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Recent Activity', style: Theme.of(context).textTheme.displayLarge),
+            const SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: activities.length,
+                itemBuilder: (context, index) {
+                  final activity = activities[index];
+                  return ActivityItem(
+                    name: activity['name']!,
+                    duration: activity['duration']!,
+                    calories: activity['calories']!,
+                  );
+                },
+              ),
             ),
-          )
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 
 class ActivityItem extends StatelessWidget {
-  const ActivityItem({Key? key}) : super(key: key);
+  final String name;
+  final String duration;
+  final String calories;
 
-  static const activities = [
-    'Running',
-    'Swimming',
-    'Hiking',
-    'Walking',
-    'Cycling'
-  ];
+  const ActivityItem({
+    Key? key,
+    required this.name,
+    required this.duration,
+    required this.calories,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    String activity = activities[Random().nextInt(activities.length)];
-
     return GestureDetector(
       onTap: () {
         Navigator.of(context).pushNamed('/details');
@@ -68,16 +90,17 @@ class ActivityItem extends StatelessWidget {
               width: 35,
               child: Container(
                 decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: AssetImage('assets/running.jpg'),
-                      fit: BoxFit.fill,
-                    )),
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: AssetImage('assets/running.jpg'),
+                    fit: BoxFit.fill,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 20),
             Text(
-              activity,
+              name,
               style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w900,
@@ -86,20 +109,18 @@ class ActivityItem extends StatelessWidget {
             const Expanded(child: SizedBox()),
             const Icon(Icons.timer, size: 12),
             const SizedBox(width: 5),
-            const Text(
-              '30min',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
+            Text(
+              '$duration min',
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
             ),
             const SizedBox(width: 10),
             const Icon(Icons.wb_sunny_outlined, size: 12),
             const SizedBox(width: 5),
-            const Text(
-              '55kcal',
-              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
+            Text(
+              '$calories kcal',
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w300),
             ),
-            const SizedBox(
-              width: 20,
-            )
+            const SizedBox(width: 20),
           ],
         ),
       ),

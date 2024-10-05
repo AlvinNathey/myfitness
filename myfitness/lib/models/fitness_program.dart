@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 enum ProgramType {
   cardio,
@@ -6,7 +5,7 @@ enum ProgramType {
 }
 
 class FitnessProgram {
-  final AssetImage image;
+  final String image; // Changed to String for image path
   final String name;
   final ProgramType type;
 
@@ -19,12 +18,12 @@ class FitnessProgram {
 
 final List<FitnessProgram> fitnessPrograms = [
   FitnessProgram(
-    image: const AssetImage('assets/running.png'),
+    image: 'assets/running.png', // Use String for image path
     name: 'Cardio options',
     type: ProgramType.cardio,
   ),
   FitnessProgram(
-    image: const AssetImage('assets/gym.png'),
+    image: 'assets/gym.png', // Use String for image path
     name: 'Weight Lifting Options',
     type: ProgramType.lift,
   ),

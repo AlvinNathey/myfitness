@@ -33,6 +33,8 @@ flutter:
     - assets/kettlebell.jpg
     - assets/smith.jpg
     - assets/profile.jpg
+    - assets/running.jpg
+    - assets/logo.png
 
   fonts:
     - family: Roboto

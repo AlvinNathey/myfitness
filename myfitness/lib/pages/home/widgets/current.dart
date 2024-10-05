@@ -10,10 +10,14 @@ class CurrentPrograms extends StatefulWidget {
 
 class _CurrentProgramsState extends State<CurrentPrograms> {
   ProgramType active = fitnessPrograms[0].type;
+  String? selectedWorkout; // To store selected workout
+  String? selectedImage; // To store the image path of the selected workout
 
   void _changeProgram(ProgramType newType) {
     setState(() {
       active = newType;
+      selectedWorkout = null; // Reset selected workout on program change
+      selectedImage = null; // Reset selected image on program change
     });
   }
 
@@ -36,6 +40,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
       {'name': 'Smith Machine', 'image': 'assets/smith.jpg'},
     ];
 
+    // Select appropriate options based on program type
     List<Map<String, String>> options = program.type == ProgramType.cardio
         ? cardioOptions
         : weightOptions;
@@ -45,7 +50,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
       builder: (BuildContext context) {
         return Container(
           padding: const EdgeInsets.all(20),
-          height: 700, // Increased height for the bottom box
+          height: 700,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -67,10 +72,15 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
 
                       return GestureDetector(
                         onTap: () {
+                          setState(() {
+                            selectedWorkout = optionName; // Set selected workout
+                            selectedImage = imagePath; // Set selected image path
+                          });
                           Navigator.pop(context); // Close modal after selection
+                          _showInputDialog(context); // Show input dialog
                         },
                         child: Container(
-                          height: 100, // Reduced height for the option containers
+                          height: 100,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(15),
                             image: DecorationImage(
@@ -88,7 +98,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16, // Adjusted font size
+                              fontSize: 16,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -103,6 +113,77 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
         );
       },
     );
+  }
+
+  void _showInputDialog(BuildContext context) {
+    String duration = '';
+    String calories = '';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          contentPadding: const EdgeInsets.all(16),
+          title: Text('$selectedWorkout Workout'),
+          content: SizedBox(
+            height: 300, // Increased height to accommodate image and text fields
+            child: Column(
+              children: [
+                // Display selected workout image
+                Container(
+                  height: 150, // Keep the image height as is
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    image: DecorationImage(
+                      image: AssetImage(selectedImage!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  decoration: const InputDecoration(labelText: 'Duration (min)'),
+                  keyboardType: TextInputType.number, // Allow only numbers
+                  onChanged: (value) {
+                    duration = value;
+                  },
+                ),
+                TextField(
+                  decoration: const InputDecoration(labelText: 'Calories Burned'),
+                  keyboardType: TextInputType.number, // Allow only numbers
+                  onChanged: (value) {
+                    calories = value;
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (duration.isNotEmpty && calories.isNotEmpty) {
+                  _recordActivity(selectedWorkout!, duration, calories);
+                  Navigator.of(context).pop(); // Close dialog after recording
+                }
+              },
+              child: const Text('Record'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _recordActivity(String name, String duration, String calories) {
+    // Implement logic to store the recent activity
+    print('Recorded Activity: $name, Duration: $duration min, Calories: $calories kcal');
   }
 
   @override
@@ -121,13 +202,12 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                 'Current Programs',
                 style: Theme.of(context).textTheme.displayLarge,
               ),
-              // Removed the arrow icon
             ],
           ),
         ),
         SizedBox(
           width: double.infinity,
-          height: 100, // Reduced height of the program containers
+          height: 100,
           child: ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             scrollDirection: Axis.horizontal,
@@ -169,8 +249,8 @@ class Program extends StatelessWidget {
         onTap(program.type);
       },
       child: Container(
-        height: 80, // Reduced height of the program container
-        width: 170, // Reduced width of the program container
+        height: 80,
+        width: 170,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           image: DecorationImage(
@@ -180,7 +260,7 @@ class Program extends StatelessWidget {
                   : Colors.white.withOpacity(.8),
               BlendMode.lighten,
             ),
-            image: program.image,
+            image: AssetImage(program.image),
             fit: BoxFit.cover,
           ),
         ),
@@ -189,7 +269,7 @@ class Program extends StatelessWidget {
         child: DefaultTextStyle.merge(
           style: TextStyle(
             color: active ? Colors.white : Colors.black,
-            fontSize: 12, // Slightly increased font size
+            fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
           child: Column(
