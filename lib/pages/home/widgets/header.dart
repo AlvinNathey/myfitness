@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +47,8 @@ class MyHomePage extends StatelessWidget {
           ],
         ),
       ),
-      body: Column(
-        children: const [
+      body: const Column(
+        children: [
           AppHeader(),
           // You can add other content of your page below this
           Expanded(child: Center(child: Text('Main Content Here'))),
@@ -59,7 +59,7 @@ class MyHomePage extends StatelessWidget {
 }
 
 class AppHeader extends StatelessWidget {
-  const AppHeader({Key? key}) : super(key: key);
+  const AppHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +90,12 @@ class AppHeader extends StatelessWidget {
               foregroundImage: AssetImage('assets/profile.jpg'),
             ),
           ),
-          Positioned(
+          const Positioned(
             right: 20,
             top: 16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'Hello',
                   style: TextStyle(

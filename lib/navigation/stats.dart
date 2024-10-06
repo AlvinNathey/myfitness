@@ -3,15 +3,17 @@ import 'package:myfitness/pages/home/widgets/header.dart';
 import 'package:myfitness/widgets/bottom_navigation.dart';
 
 class StatsPage extends StatelessWidget {
+  const StatsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           const AppHeader(),
-          Expanded(
+          const Expanded(
             child: Center(
-              child: const Text('Stats Page Content'),
+              child: Text('Stats Page Content'),
             ),
           ),
           BottomNavigation(

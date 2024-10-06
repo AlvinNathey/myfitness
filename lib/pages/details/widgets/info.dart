@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class Info extends StatelessWidget {
-  const Info({Key? key}) : super(key: key);
+  const Info({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: const [
+      children: [
         Stats(value: '345', unit: 'kcal', label: 'Calories'),
         Stats(value: '3.6', unit: 'km', label: 'Distance'),
         Stats(value: '1.5', unit: 'hr', label: 'Hours'),
@@ -22,11 +22,11 @@ class Stats extends StatelessWidget {
   final String label;
 
   const Stats({
-    Key? key,
+    super.key,
     required this.value,
     required this.unit,
     required this.label,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

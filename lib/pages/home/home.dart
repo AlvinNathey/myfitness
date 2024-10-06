@@ -5,7 +5,7 @@ import 'package:myfitness/pages/home/widgets/header.dart';
 import 'package:myfitness/widgets/bottom_navigation.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

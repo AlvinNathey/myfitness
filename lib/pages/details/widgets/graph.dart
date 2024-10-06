@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 class Graph extends StatelessWidget {
-  const Graph({Key? key}) : super(key: key);
+  const Graph({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class Graph extends StatelessWidget {
 }
 
 class GraphArea extends StatefulWidget {
-  const GraphArea({Key? key}) : super(key: key);
+  const GraphArea({super.key});
 
   @override
   _GraphAreaState createState() => _GraphAreaState();

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class Stats extends StatelessWidget {
-  const Stats({Key? key}) : super(key: key);
+  const Stats({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: EdgeInsets.symmetric(horizontal: 30),
           child: Row(
-            children: const [
+            children: [
               Text(
                 'Workout Stats',
                 style: TextStyle(
@@ -27,11 +27,11 @@ class Stats extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 15),
+        SizedBox(height: 15),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: const [
+            children: [
               SizedBox(width: 30),
               InfoStat(
                 icon: Icons.timer,
@@ -77,14 +77,14 @@ class InfoStat extends StatelessWidget {
   final String value;
 
   const InfoStat({
-    Key? key,
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.iconBackground,
     required this.time,
     required this.label,
     required this.value,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -142,9 +142,9 @@ class InfoStat extends StatelessWidget {
 
 class Change extends StatelessWidget {
   const Change({
-    Key? key,
+    super.key,
     required this.time,
-  }) : super(key: key);
+  });
 
   final String time;
 
@@ -172,11 +172,11 @@ class Change extends StatelessWidget {
 
 class StatIcon extends StatelessWidget {
   const StatIcon({
-    Key? key,
+    super.key,
     required this.icon,
     required this.iconColor,
     required this.iconBackground,
-  }) : super(key: key);
+  });
 
   final IconData icon;
   final Color iconColor;

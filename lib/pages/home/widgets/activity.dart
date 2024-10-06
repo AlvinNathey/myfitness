@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:myfitness/database.dart'; // Import your DatabaseService
 
 class RecentActivities extends StatefulWidget {
-  const RecentActivities({Key? key}) : super(key: key);
+  const RecentActivities({super.key});
 
   @override
   State<RecentActivities> createState() => _RecentActivitiesState();
 }
 
 class _RecentActivitiesState extends State<RecentActivities> {
-  final List<Map<String, String>> activities = [];
+  List<Map<String, dynamic>> activities = []; // List to hold activities
+  DatabaseService dbService = DatabaseService(); // Create an instance of DatabaseService
 
   @override
   void initState() {
     super.initState();
-    // Fetch activities when the widget is initialized
+    _fetchActivities(); // Fetch activities when the widget is initialized
   }
 
-  // Fetch activities logic should be added here later when implementing Firebase
+  void _fetchActivities() async {
+    List<Map<String, dynamic>> fetchedActivities = await dbService.fetchActivities(); // Fetch activities from Firestore
+    setState(() {
+      activities = fetchedActivities; // Update the state with the fetched activities
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,47 +33,43 @@ class _RecentActivitiesState extends State<RecentActivities> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Recent Activity', style: Theme.of(context).textTheme.displayLarge),
-            const SizedBox(height: 20),
+            Text('Recent Activity', style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 10),
             Expanded(
-              child: ListView.builder(
-                itemCount: activities.length,
-                itemBuilder: (context, index) {
-                  final activity = activities[index];
-                  return ActivityItem(
-                    name: activity['name']!,
-                    duration: activity['duration']!,
-                    calories: activity['calories']!,
-                  );
-                },
-              ),
+              child: activities.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: activities.length,
+                      itemBuilder: (context, index) {
+                        final activity = activities[index];
+                        // Safely access the fields from Firestore
+                        final String name = activity['name'] ?? 'Unknown workout';
+                        final String duration = activity['duration'] ?? 'N/A';
+                        final String calories = activity['calories'] ?? 'N/A';
+                        final String imagePath = activity['image'] ?? 'assets/default_image.png'; // Default image
+
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 5),
+                          child: ListTile(
+                            leading: Image.asset(
+                              imagePath,
+                              width: 20,
+                              height: 10,
+                              fit: BoxFit.cover,
+                            ),
+                            title: Text(name), // Display name or default
+                            subtitle: Text(
+                              'Duration: $duration min, Calories: $calories kcal',
+                            ),
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Text('Record your workout for data to appear here'),
+                    ),
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class ActivityItem extends StatelessWidget {
-  final String name;
-  final String duration;
-  final String calories;
-
-  const ActivityItem({
-    Key? key,
-    required this.name,
-    required this.duration,
-    required this.calories,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      child: ListTile(
-        title: Text(name),
-        subtitle: Text('Duration: $duration min, Calories: $calories kcal'),
       ),
     );
   }

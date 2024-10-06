@@ -2,7 +2,7 @@ import 'package:myfitness/helpers.dart';
 import 'package:flutter/material.dart';
 
 class Dates extends StatelessWidget {
-  const Dates({Key? key}) : super(key: key);
+  const Dates({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +31,10 @@ class DateBox extends StatelessWidget {
   final DateTime date;
 
   const DateBox({
-    Key? key,
+    super.key,
     this.active = false,
     required this.date,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

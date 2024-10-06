@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:myfitness/models/fitness_program.dart';
+import 'package:myfitness/database.dart'; // Import your DatabaseService
 
 class CurrentPrograms extends StatefulWidget {
-  const CurrentPrograms({Key? key}) : super(key: key);
+  const CurrentPrograms({super.key});
 
   @override
   State<CurrentPrograms> createState() => _CurrentProgramsState();
@@ -22,7 +23,6 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
   }
 
   void _showMoreOptions(BuildContext context, FitnessProgram program) {
-    // Define cardio-specific options and their images
     final List<Map<String, String>> cardioOptions = [
       {'name': 'Indoor Running', 'image': 'assets/running.png'},
       {'name': 'Outdoor Running', 'image': 'assets/outdoor running.jpg'},
@@ -32,7 +32,6 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
       {'name': 'Outdoor Walking', 'image': 'assets/outdoor walking.jpg'},
     ];
 
-    // Define weight-lifting options and their images
     final List<Map<String, String>> weightOptions = [
       {'name': 'Barbell', 'image': 'assets/barbell.jpg'},
       {'name': 'Dumbbell', 'image': 'assets/dumbbell.jpg'},
@@ -40,7 +39,6 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
       {'name': 'Smith Machine', 'image': 'assets/smith.jpg'},
     ];
 
-    // Select appropriate options based on program type
     List<Map<String, String>> options = program.type == ProgramType.cardio
         ? cardioOptions
         : weightOptions;
@@ -118,6 +116,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
   void _showInputDialog(BuildContext context) {
     String duration = '';
     String calories = '';
+    DatabaseService dbService = DatabaseService(); // Create an instance of DatabaseService
 
     showDialog(
       context: context,
@@ -136,7 +135,9 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     image: DecorationImage(
-                      image: AssetImage(selectedImage!),
+                      image: selectedImage != null 
+                          ? AssetImage(selectedImage!)
+                          : AssetImage('assets/profile.jpg'), // Default image if no workout selected
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -165,9 +166,19 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
-                // You can implement the logic for saving data later
-                Navigator.of(context).pop(); // Close the dialog
+              onPressed: () async {
+                print('Record button pressed');
+                print('Selected Workout: $selectedWorkout, Duration: $duration, Calories: $calories');
+                
+                // Ensure that selectedWorkout is not null and both fields are filled
+                if (selectedWorkout != null && duration.isNotEmpty && calories.isNotEmpty) {
+                  // Update the following line according to your addActivity function signature
+                  await dbService.addActivity(selectedWorkout!, duration, calories, selectedImage);
+                  Navigator.of(context).pop(); // Close the dialog
+                } else {
+                  // Handle empty inputs
+                  print('Please fill all fields');
+                }
               },
               child: const Text('Record'),
             ),
@@ -200,49 +211,53 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                       ),
                       child: Text(
                         program.name,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: active == program.type
-                                  ? const Color(0xff202c43)
-                                  : const Color(0xff202c43).withOpacity(0.5),
-                            ),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: active == program.type ? Colors.black : Colors.grey,
+                        ),
                       ),
                     ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                _showMoreOptions(context, fitnessPrograms.firstWhere((p) => p.type == active));
-              },
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  image: DecorationImage(
-                    image: active == ProgramType.cardio
-                        ? const AssetImage('assets/running.jpg')
-                        : const AssetImage('assets/weights.jpg'),
-                    fit: BoxFit.cover,
-                    colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.5),
-                      BlendMode.darken,
+            const SizedBox(height: 25),
+            Column(
+              children: fitnessPrograms
+                  .where((program) => program.type == active)
+                  .map((program) {
+                return GestureDetector(
+                  onTap: () {
+                    _showMoreOptions(context, program);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 130,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      image: DecorationImage(
+                        image: AssetImage(program.image),
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          Colors.black.withOpacity(0.5),
+                          BlendMode.darken,
+                        ),
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      program.name,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Record your ${active == ProgramType.cardio ? 'Cardio' : 'Weight'} Workout',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ),
+                );
+              }).toList(),
             ),
           ],
         ),

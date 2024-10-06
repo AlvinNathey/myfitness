@@ -2,7 +2,7 @@ import 'package:myfitness/helpers.dart';
 import 'package:flutter/material.dart';
 
 class Steps extends StatelessWidget {
-  const Steps({Key? key}) : super(key: key);
+  const Steps({super.key});
 
   @override
   Widget build(BuildContext context) {

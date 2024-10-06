@@ -4,9 +4,9 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final AppBar appBar;
 
   const MainAppBar({
-    Key? key,
+    super.key,
     required this.appBar,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +35,15 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       actions: [
         TextButton(
           onPressed: () {},
-          child: const Icon(
-            Icons.notifications,
-            size: 16,
-          ),
           style: ElevatedButton.styleFrom(
             foregroundColor: const Color(0xfffa7a3b), backgroundColor: const Color(0xffffe6da), padding: const EdgeInsets.all(5),
             maximumSize: const Size(30, 30),
             minimumSize: const Size(30, 30),
             shape: const CircleBorder(),
+          ),
+          child: const Icon(
+            Icons.notifications,
+            size: 16,
           ),
         )
       ],

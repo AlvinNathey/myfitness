@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:myfitness/pages/details/details.dart';
 import 'package:myfitness/pages/home/home.dart'; // Ensure this is correct
-import 'package:myfitness/navigation/records.dart'; // Import RecordsPage
+import 'package:myfitness/navigation/records.dart'; // Import Records (change to Records from RecordsPage)
 import 'package:myfitness/navigation/stats.dart';   // Import StatsPage
 import 'package:myfitness/navigation/profile.dart'; // Import ProfilePage
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => const HomePage(),         // Default route to Home
         '/home': (context) => const HomePage(),     // Ensure the home route is defined
         '/details': (context) => const DetailsPage(),
-        '/records': (context) => RecordsPage(),      // Records Page route
+        '/records': (context) => const Records(),    // Change this to const Records()
         '/stats': (context) => StatsPage(),          // Stats Page route
         '/profile': (context) => ProfilePage(),      // Profile Page route
       },
