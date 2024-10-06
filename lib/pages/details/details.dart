@@ -24,7 +24,7 @@ class DetailsPage extends StatelessWidget {
           Divider(height: 30),
           Stats(),
           SizedBox(height: 30),
-          BottomNavigation(),
+         // BottomNavigation(),
         ],
       ),
     );

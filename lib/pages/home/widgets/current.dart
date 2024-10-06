@@ -193,7 +193,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                     },
                     child: Container(
                       alignment: Alignment.center,
-                      height: 45,
+                      height: 55,
                       decoration: BoxDecoration(
                         color: active == program.type ? const Color(0xffcff2ff) : null,
                         borderRadius: BorderRadius.circular(5),
