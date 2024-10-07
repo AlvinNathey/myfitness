@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:myfitness/database.dart'; // Import your DatabaseService
+import 'package:intl/intl.dart'; // Import the intl package for date formatting
 
 class RecentActivities extends StatefulWidget {
   const RecentActivities({super.key});
@@ -25,48 +27,77 @@ class _RecentActivitiesState extends State<RecentActivities> {
     });
   }
 
+  String _formatDateTime(DateTime dateTime) {
+    // Format the date and time as "8:21 AM 7 October"
+    return DateFormat('h:mm a d MMMM').format(dateTime);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 30),
+        padding: const EdgeInsets.symmetric(horizontal: 23),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Recent Activity', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 10),
+            const Text(
+              'Recent Activities',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
             Expanded(
-              child: activities.isNotEmpty
-                  ? ListView.builder(
-                      itemCount: activities.length,
-                      itemBuilder: (context, index) {
-                        final activity = activities[index];
-                        // Safely access the fields from Firestore
-                        final String name = activity['name'] ?? 'Unknown workout';
-                        final String duration = activity['duration'] ?? 'N/A';
-                        final String calories = activity['calories'] ?? 'N/A';
-                        final String imagePath = activity['image'] ?? 'assets/default_image.png'; // Default image
+              child: ListView.builder(
+                itemCount: activities.length,
+                itemBuilder: (BuildContext context, int index) {
+                  String workoutName = activities[index]['name'];
+                  String duration = activities[index]['duration'];
+                  String calories = activities[index]['calories'];
+                  String? image = activities[index]['image']; // Retrieve the image URL
+                  DateTime activityTime = (activities[index]['timestamp'] as Timestamp).toDate(); // Assuming Firestore stores 'timestamp'
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(vertical: 5),
-                          child: ListTile(
-                            leading: Image.asset(
-                              imagePath,
-                              width: 20,
-                              height: 10,
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      children: [
+                        // Display the workout image
+                        Container(
+                          height: 70,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            image: DecorationImage(
+                              image: AssetImage(image ?? 'assets/profile.jpg'), // Use default image if null
                               fit: BoxFit.cover,
                             ),
-                            title: Text(name), // Display name or default
-                            subtitle: Text(
-                              'Duration: $duration min, Calories: $calories kcal',
-                            ),
                           ),
-                        );
-                      },
-                    )
-                  : const Center(
-                      child: Text('Record your workout for data to appear here'),
+                        ),
+                        const SizedBox(width: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              workoutName,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text('$duration min  |  $calories kcal'),
+                            const SizedBox(height: 5),
+                            Text(
+                              _formatDateTime(activityTime), // Display the formatted date and time
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
+                  );
+                },
+              ),
             ),
           ],
         ),

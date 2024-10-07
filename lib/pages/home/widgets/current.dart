@@ -14,6 +14,18 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
   String? selectedWorkout; // To store selected workout
   String? selectedImage; // To store the image path of the selected workout
 
+  // Create an instance of DatabaseService
+  DatabaseService dbService = DatabaseService(); 
+
+  // Fetch the latest data and update the UI
+  void _refreshData() async {
+    // Fetch the latest data from the database here
+    // For example, you can call a method from DatabaseService to get the latest activities or programs
+    setState(() {
+      // You can update any part of the UI with the newly fetched data here
+    });
+  }
+
   void _changeProgram(ProgramType newType) {
     setState(() {
       active = newType;
@@ -116,7 +128,6 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
   void _showInputDialog(BuildContext context) {
     String duration = '';
     String calories = '';
-    DatabaseService dbService = DatabaseService(); // Create an instance of DatabaseService
 
     showDialog(
       context: context,
@@ -174,6 +185,10 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                 if (selectedWorkout != null && duration.isNotEmpty && calories.isNotEmpty) {
                   // Update the following line according to your addActivity function signature
                   await dbService.addActivity(selectedWorkout!, duration, calories, selectedImage);
+                  
+                  // Refresh the data after recording the workout
+                  _refreshData();
+                  
                   Navigator.of(context).pop(); // Close the dialog
                 } else {
                   // Handle empty inputs
@@ -232,7 +247,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                   },
                   child: Container(
                     width: double.infinity,
-                    height: 130,
+                    height: 200,
                     margin: const EdgeInsets.only(bottom: 20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
