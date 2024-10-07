@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:myfitness/database.dart'; // Import your DatabaseService
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
 
 class EditActivityDialog extends StatelessWidget {
   final Map<String, dynamic> activity;
   final DatabaseService dbService = DatabaseService();
 
-  EditActivityDialog({Key? key, required this.activity}) : super(key: key);
+  EditActivityDialog({super.key, required this.activity});
 
   @override
   Widget build(BuildContext context) {

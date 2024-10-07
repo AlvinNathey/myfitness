@@ -19,7 +19,7 @@ class FitnessProgram {
 final List<FitnessProgram> fitnessPrograms = [
   FitnessProgram(
     image: 'assets/running.png', // Use String for image path
-    name: 'Cardio options',
+    name: 'Cardio Options',
     type: ProgramType.cardio,
   ),
   FitnessProgram(

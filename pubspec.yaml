@@ -10,10 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  intl: ^0.17.0
+  intl: ^0.19.0
   cupertino_icons: ^1.0.8
   firebase_core: ^3.6.0
   cloud_firestore: ^5.4.4
+  table_calendar: ^3.0.0
   # Uncomment if needed
   # firebase_auth: ^5.3.1
   # firebase_storage: ^12.3.5

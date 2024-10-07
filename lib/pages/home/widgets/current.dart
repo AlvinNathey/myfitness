@@ -19,8 +19,6 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
 
   // Fetch the latest data and update the UI
   void _refreshData() async {
-    // Fetch the latest data from the database here
-    // For example, you can call a method from DatabaseService to get the latest activities or programs
     setState(() {
       // You can update any part of the UI with the newly fetched data here
     });
@@ -118,6 +116,9 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                   ),
                 ),
               ),
+              // Add a Text widget to provide additional instructions
+              const SizedBox(height: 20),
+             
             ],
           ),
         );
