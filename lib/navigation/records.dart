@@ -4,6 +4,7 @@ import 'package:myfitness/pages/home/widgets/header.dart';
 import 'package:myfitness/widgets/bottom_navigation.dart';
 import 'package:myfitness/database.dart'; // Import your DatabaseService
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // For authentication
 
 class Records extends StatefulWidget {
   const Records({super.key});
@@ -15,6 +16,8 @@ class Records extends StatefulWidget {
 class _RecordsState extends State<Records> {
   List<Map<String, dynamic>> activities = []; // List to hold activities
   DatabaseService dbService = DatabaseService(); // Create an instance of DatabaseService
+  final FirebaseAuth _auth = FirebaseAuth.instance; // For authentication
+  bool isLoading = true; // To handle loading state
 
   @override
   void initState() {
@@ -22,11 +25,19 @@ class _RecordsState extends State<Records> {
     _fetchActivities(); // Fetch activities when the widget is initialized
   }
 
-  void _fetchActivities() async {
-    List<Map<String, dynamic>> fetchedActivities = await dbService.fetchActivities(); // Fetch activities from Firestore
-    setState(() {
-      activities = fetchedActivities; // Update the state with the fetched activities
-    });
+  Future<void> _fetchActivities() async {
+    User? user = _auth.currentUser; // Get the current user
+    if (user != null) {
+      List<Map<String, dynamic>> fetchedActivities = await dbService.fetchActivities(); // No need to pass user ID
+      setState(() {
+        activities = fetchedActivities; // Update the state with the fetched activities
+        isLoading = false; // Update loading state
+      });
+    } else {
+      setState(() {
+        isLoading = false; // Update loading state even if user is null
+      });
+    }
   }
 
   String _formatDateTime(DateTime dateTime) {
@@ -58,7 +69,7 @@ class _RecordsState extends State<Records> {
                 // Display the activity image
                 Container(
                   height: 190,
-                  width: 290,         
+                  width: 290,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
                     image: DecorationImage(
@@ -166,81 +177,81 @@ class _RecordsState extends State<Records> {
             ),
           ),
           Expanded(
-            child: activities.isEmpty
-                ? const Center(
-                    child: Text('No activities recorded yet.'),
-                  )
-                : ListView.builder(
-                    itemCount: activities.length,
-                    itemBuilder: (context, index) {
-                      String workoutName = activities[index]['name'];
-                      String duration = activities[index]['duration'];
-                      String calories = activities[index]['calories'];
-                      String? image = activities[index]['image']; // Retrieve the image URL
-                      DateTime timestamp = (activities[index]['timestamp'] as Timestamp).toDate(); // Convert timestamp to DateTime
-                      String formattedTime = _formatDateTime(timestamp); // Format the DateTime
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator()) // Show loading indicator
+                : activities.isEmpty
+                    ? const Center(child: Text('No activities recorded yet.'))
+                    : ListView.builder(
+                        itemCount: activities.length,
+                        itemBuilder: (context, index) {
+                          String workoutName = activities[index]['name'];
+                          String duration = activities[index]['duration'];
+                          String calories = activities[index]['calories'];
+                          String? image = activities[index]['image']; // Retrieve the image URL
+                          DateTime timestamp = (activities[index]['timestamp'] as Timestamp).toDate(); // Convert timestamp to DateTime
+                          String formattedTime = _formatDateTime(timestamp); // Format the DateTime
 
-                      return GestureDetector(
-                        onTap: () => _showActivityDetails(activities[index]), // Show activity details on tap
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 20, left: 20),
-                          child: Row(
-                            children: [
-                              // Display the workout image
-                              Container(
-                                height: 70,
-                                width: 70,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                  image: DecorationImage(
-                                    image: AssetImage(image ?? 'assets/profile.jpg'), // Use default image if null
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 20),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                          return GestureDetector(
+                            onTap: () => _showActivityDetails(activities[index]), // Show activity details on tap
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 20, left: 20),
+                              child: Row(
                                 children: [
-                                  Text(
-                                    workoutName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                  // Display the workout image
+                                  Container(
+                                    height: 70,
+                                    width: 70,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      image: DecorationImage(
+                                        image: AssetImage(image ?? 'assets/profile.jpg'), // Use default image if null
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
-                                  const SizedBox(height: 5),
-                                  Text('$duration min  |  $calories kcal'),
-                                  const SizedBox(height: 5),
-                                  Text(formattedTime), // Display formatted time
+                                  const SizedBox(width: 20),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        workoutName,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Text('$duration min  |  $calories kcal'),
+                                      const SizedBox(height: 5),
+                                      Text(formattedTime), // Display formatted time
+                                    ],
+                                  ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          BottomNavigation(
-            selectedIndex: 1, // Set index for Records page
-            onItemTapped: (index) {
-              switch (index) {
-                case 0:
-                  Navigator.of(context).pushReplacementNamed('/');
-                  break;
-                case 1:
-                  // does nothing, already on Records page
-                  break;
-                case 2:
-                  Navigator.of(context).pushReplacementNamed('/stats'); // Navigate to stats page if needed
-                  break;
-                case 3:
-                  Navigator.of(context).pushReplacementNamed('/profile');
-                  break;
-              }
-            },
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigation(
+        selectedIndex: 1, // Set index for Records page
+        onItemTapped: (index) {
+          switch (index) {
+            case 0:
+              Navigator.of(context).pushReplacementNamed('/'); // Navigate to Home page
+              break;
+            case 1:
+              // Do nothing, already on Records
+              break;
+            case 2:
+              Navigator.of(context).pushReplacementNamed('/stats'); // Navigate to Stats page
+              break;
+            case 3:
+              Navigator.of(context).pushReplacementNamed('/profile'); // Navigate to Profile page
+              break;
+          }
+        },
       ),
     );
   }

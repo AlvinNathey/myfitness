@@ -1,5 +1,6 @@
 name: myfitness
 description: "A new Flutter project."
+
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -12,12 +13,12 @@ dependencies:
     sdk: flutter
   intl: ^0.19.0
   cupertino_icons: ^1.0.8
-  firebase_core: ^3.6.0
+  firebase_core: ^3.6.0 # Specify the version explicitly
   cloud_firestore: ^5.4.4
   table_calendar: ^3.0.0
-  # Uncomment if needed
-  # firebase_auth: ^5.3.1
-  # firebase_storage: ^12.3.5
+  firebase_auth: ^5.3.1 # Uncomment and specify the version
+  google_sign_in: ^6.1.5  # Specify version
+  firebase_storage: 12.3.2 # Uncomment if you need Firebase storage
 
 dev_dependencies:
   flutter_test:

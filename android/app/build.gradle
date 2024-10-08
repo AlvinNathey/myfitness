@@ -8,8 +8,7 @@ plugins {
 
 android {
     namespace = "com.example.myfitness"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdkVersion 34 // Set this to the latest supported SDK
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -22,10 +21,10 @@ android {
 
     defaultConfig {
         applicationId = "com.example.myfitness"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdkVersion 23  // Set this to 23 to meet Firebase Auth requirement
+        targetSdkVersion 33 // Keep this updated to the latest supported version
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
@@ -38,4 +37,6 @@ android {
 flutter {
     source = "../.."
 }
+
+// Apply the Google Services plugin after the Android block
 apply plugin: 'com.google.gms.google-services'

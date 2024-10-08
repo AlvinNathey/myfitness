@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:myfitness/pages/home/widgets/header.dart';
 import 'package:myfitness/widgets/bottom_navigation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth for user identification
 
 class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
@@ -16,36 +17,48 @@ class StatsPage extends StatefulWidget {
 class _StatsPageState extends State<StatsPage> {
   late Map<DateTime, List<Map<String, dynamic>>> activitiesMap;
   DateTime selectedDay = DateTime.now();
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Instance of FirebaseAuth
+  String? userId; // Current user's ID
 
   @override
   void initState() {
     super.initState();
     activitiesMap = {};
-    _fetchActivities();
+    _fetchUserActivities(); // Fetch activities for the current user
   }
 
-  Future<void> _fetchActivities() async {
-    final QuerySnapshot snapshot =
-        await FirebaseFirestore.instance.collection('activities').get();
+  Future<void> _fetchUserActivities() async {
+    // Get the current user's ID
+    User? user = _auth.currentUser;
+    if (user != null) {
+      userId = user.uid; // Store the current user's ID
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('activities')
+          .where('userId', isEqualTo: userId) // Query activities based on user ID
+          .get();
 
-    for (var doc in snapshot.docs) {
-      final data = doc.data() as Map<String, dynamic>;
-      DateTime date = (data['timestamp'] as Timestamp).toDate();
-      date = DateTime(date.year, date.month, date.day);
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        DateTime date = (data['timestamp'] as Timestamp).toDate();
+        date = DateTime(date.year, date.month, date.day);
 
-      String? caloriesString = data['calories'] as String?;
-      // ignore: unused_local_variable
-      int calories = caloriesString != null ? int.parse(caloriesString) : 0;
+        String? caloriesString = data['calories'] as String?;
+        // ignore: unused_local_variable
+        int calories = caloriesString != null ? int.parse(caloriesString) : 0;
 
-      print('Fetched activity: $caloriesString calories on $date');
+        print('Fetched activity: $caloriesString calories on $date');
 
-      if (activitiesMap[date] == null) {
-        activitiesMap[date] = [];
+        if (activitiesMap[date] == null) {
+          activitiesMap[date] = [];
+        }
+        activitiesMap[date]!.add(data);
       }
-      activitiesMap[date]!.add(data);
-    }
 
-    setState(() {});
+      setState(() {}); // Refresh the UI
+    } else {
+      // Handle case where the user is not logged in
+      print('No user is currently logged in.');
+    }
   }
 
   int _getTotalCaloriesForDay(DateTime day) {

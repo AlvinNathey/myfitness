@@ -3,7 +3,9 @@ import 'package:myfitness/models/fitness_program.dart';
 import 'package:myfitness/database.dart'; // Import your DatabaseService
 
 class CurrentPrograms extends StatefulWidget {
-  const CurrentPrograms({super.key});
+  final Function onActivityAdded; // Add this line
+
+  const CurrentPrograms({super.key, required this.onActivityAdded}); // Update the constructor
 
   @override
   State<CurrentPrograms> createState() => _CurrentProgramsState();
@@ -116,9 +118,7 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
                   ),
                 ),
               ),
-              // Add a Text widget to provide additional instructions
               const SizedBox(height: 20),
-             
             ],
           ),
         );
@@ -179,16 +179,13 @@ class _CurrentProgramsState extends State<CurrentPrograms> {
             ),
             ElevatedButton(
               onPressed: () async {
-                print('Record button pressed');
-                print('Selected Workout: $selectedWorkout, Duration: $duration, Calories: $calories');
-                
-                // Ensure that selectedWorkout is not null and both fields are filled
                 if (selectedWorkout != null && duration.isNotEmpty && calories.isNotEmpty) {
-                  // Update the following line according to your addActivity function signature
                   await dbService.addActivity(selectedWorkout!, duration, calories, selectedImage);
                   
-                  // Refresh the data after recording the workout
-                  _refreshData();
+                  // Call the callback here
+                  widget.onActivityAdded(); // This calls the callback to refresh activities
+                  
+                  _refreshData(); // Refresh data after recording the workout
                   
                   Navigator.of(context).pop(); // Close the dialog
                 } else {

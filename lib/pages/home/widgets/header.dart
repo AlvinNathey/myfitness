@@ -1,62 +1,6 @@
 import 'package:flutter/material.dart';
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Use the left Drawer instead of endDrawer
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color(0xff18b0e8),
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person),
-              title: const Text('Profile'),
-              onTap: () {
-                // Handle profile navigation here
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.devices),
-              title: const Text('Add Devices'),
-              onTap: () {
-                // Handle add devices functionality here
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.data_usage),
-              title: const Text('Data Sources'),
-              onTap: () {
-                // Handle data sources management here
-              },
-            ),
-          ],
-        ),
-      ),
-      body: const Column(
-        children: [
-          AppHeader(),
-          // You can add other content of your page below this
-          Expanded(child: Center(child: Text('Main Content Here'))),
-        ],
-      ),
-    );
-  }
-}
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth import
 
 class AppHeader extends StatelessWidget {
   const AppHeader({super.key});
@@ -87,32 +31,50 @@ class AppHeader extends StatelessWidget {
             child: CircleAvatar(
               minRadius: 25,
               maxRadius: 25,
-              foregroundImage: AssetImage('assets/profile.jpg'),
+              foregroundImage: AssetImage('assets/profile.jpg'), // Replace with user's profile image if available
             ),
           ),
-          const Positioned(
+          Positioned(
             right: 20,
             top: 16,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Hello',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
-                    fontSize: 20,
-                  ),
-                ),
-                Text(
-                  'Nathey',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
+            child: FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser?.uid) // Fetch user document
+                  .get(),
+              builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator(); // Show loading indicator while waiting for data
+                }
+                if (snapshot.hasError) {
+                  return const Text('Error fetching user data'); // Handle error
+                }
+                if (snapshot.hasData && snapshot.data!.exists) {
+                  String firstName = snapshot.data!['first_name'] ?? 'User'; // Retrieve first name
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Hello',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w300,
+                          fontSize: 20,
+                        ),
+                      ),
+                      Text(
+                        firstName, // Display first name
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  );
+                }
+                return const Text('User'); // Default text if no user data
+              },
             ),
           ),
         ],
