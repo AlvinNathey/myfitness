@@ -120,6 +120,9 @@ The structure of the Firebase database can be seen below:
 - Dart SDK
 - Firebase Project (with Firestore and Authentication enabled)
 
+Here's the corrected and properly formatted section that you can copy and paste directly into your README file:
+
+```markdown
 
 ### Installation
 
@@ -129,46 +132,47 @@ The structure of the Firebase database can be seen below:
 
    ```bash
    git clone https://github.com/yourusername/myfitness.git
+   ```
 
+2. **Navigate to the project directory**:
 
-2.  **Navigate to the project directory**:
-    After cloning, go into the project directory.
+   After cloning, go into the project directory.
 
-    cd myfitness
+   ```bash
+   cd myfitness
+   ```
 
 3. **Install dependencies**:
-    Install all required packages and dependencies using the following command:
 
-    flutter pub get
+   Install all required packages and dependencies using the following command:
+
+   ```bash
+   flutter pub get
+   ```
 
 4. **Set up Firebase**:
 
-    To set up Firebase, follow these steps:
+   To set up Firebase, follow these steps:
 
-Create a Firebase project by going to the Firebase Console.
-
-Add an Android and/or iOS app within your Firebase project.
-
-Download the configuration file:
-
-For Android: Download google-services.json and place it in the android/app directory.
-
-For iOS: Download GoogleService-Info.plist and place it in the ios/Runner directory.
-
-Make sure Firebase Authentication and Cloud Firestore are enabled for your project on the Firebase Console.
+   - Create a Firebase project by going to the [Firebase Console](https://console.firebase.google.com/).
+   - Add an Android and/or iOS app within your Firebase project.
+   - Download the configuration file:
+     - For Android: Download `google-services.json` and place it in the `android/app` directory.
+     - For iOS: Download `GoogleService-Info.plist` and place it in the `ios/Runner` directory.
+   - Make sure Firebase Authentication and Cloud Firestore are enabled for your project on the Firebase Console.
 
 5. **Run the app**:
 
-    After Firebase is set up, run the application using:
+   After Firebase is set up, run the application using:
 
-    flutter run
-
+   ```bash
+   flutter run
+   ```
 
 ### Usage
-Open the app, and you will be presented with a login screen where you can either log in with your credentials or sign up if you're a new user.
 
-Navigate through the app using the bottom navigation bar to access different sections (Home, Records, Stats, Profile).
-
-Log your activities, view statistics, and manage your profile information.  
-
+- Open the app, and you will be presented with a login screen where you can either log in with your credentials or sign up if you're a new user.
+- Navigate through the app using the bottom navigation bar to access different sections (Home, Records, Stats, Profile).
+- Log your activities, view statistics, and manage your profile information.
+```
 
