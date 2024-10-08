@@ -141,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
           // Modified Header with logo.jpg only
           Container(
             padding: const EdgeInsets.all(16.0),
-            color: Colors.blue, // Adjust the background color if needed
+            color: const Color(0xff18b0e8), // Adjust the background color if needed
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

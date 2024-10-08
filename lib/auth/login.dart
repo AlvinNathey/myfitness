@@ -25,10 +25,10 @@ class _LoginPageState extends State<LoginPage> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
         );
-        Navigator.pushReplacementNamed(context, '/'); // Navigate to Home
+        // Navigate to Home
+        Navigator.pushReplacementNamed(context, '/home');
       } catch (e) {
         setState(() {
-          // Set custom error message based on Firebase error
           if (e is FirebaseAuthException) {
             if (e.code == 'user-not-found') {
               _errorMessage = 'No user found for that email.';
@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                       return 'Please enter a valid email address';
                     }
                     return null;
@@ -97,7 +97,6 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                // Display error message if exists
                 if (_errorMessage != null) 
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10.0),

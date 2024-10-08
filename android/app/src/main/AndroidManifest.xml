@@ -12,7 +12,8 @@
     <application
         android:label="myfitness"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="true"> <!-- Added to enable back invoked callback -->
 
         <activity
             android:name=".MainActivity"

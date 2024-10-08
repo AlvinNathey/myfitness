@@ -1,86 +1,105 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore import
-import 'package:intl/intl.dart'; // For formatting the selected date
+import 'package:intl/intl.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);
 
   @override
-  State<SignupPage> createState() => _SignupPageState();
+  _SignupPageState createState() => _SignupPageState();
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _dobController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
-  bool _obscurePassword = true; // For toggling password visibility
-  bool _obscureConfirmPassword = true; // For toggling confirm password visibility
-
-  // Method for email/password signup
-  Future<void> _signup() async {
-    if (_formKey.currentState!.validate()) {
-      if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Passwords do not match'),
-          ),
-        );
-        return;
-      }
-      try {
-        UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-          email: _emailController.text,
-          password: _passwordController.text,
-        );
-
-        // Save user data to Firestore
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user?.uid) // Save data by user ID
-            .set({
-          'first_name': _firstNameController.text,
-          'last_name': _lastNameController.text,
-          'email': _emailController.text,
-          'date_of_birth': _dobController.text,
-        });
-
-        Navigator.pushReplacementNamed(context, '/home');
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Signup Failed: ${e.toString()}'),
-        ));
-      }
-    }
-  }
-
-  // Method to show the date picker
   Future<void> _selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(1900), // Set earliest date to be selected
-      lastDate: DateTime.now(), // Set latest date to today
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
     );
     if (picked != null) {
       setState(() {
-        _dobController.text = DateFormat('yyyy-MM-dd').format(picked); // Format date to yyyy-MM-dd
+        _dobController.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
+  }
+
+  Future<void> _signup() async {
+    if (_formKey.currentState!.validate()) {
+      if (_passwordController.text == _confirmPasswordController.text) {
+        try {
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          );
+
+          // Show success message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('User has been created!'),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+
+          // Wait for a moment before navigating to the login page
+          await Future.delayed(const Duration(seconds: 2));
+
+          // Navigate to LoginPage upon successful signup
+          Navigator.pushReplacementNamed(context, '/login');
+        } on FirebaseAuthException catch (e) {
+          String message = e.message ?? 'Error occurred';
+          _showErrorDialog(message);
+        }
+      } else {
+        _showErrorDialog('Passwords do not match.');
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
       backgroundColor: Colors.blue[50],
       body: Center(
-        child: SingleChildScrollView( // Allows for scrolling on smaller screens
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Form(
@@ -90,7 +109,6 @@ class _SignupPageState extends State<SignupPage> {
                 children: [
                   Image.asset('assets/logo.png', height: 100),
                   const SizedBox(height: 20),
-                  // First Name
                   TextFormField(
                     controller: _firstNameController,
                     decoration: const InputDecoration(labelText: 'First Name'),
@@ -101,8 +119,7 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 10),
-                  // Last Name
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _lastNameController,
                     decoration: const InputDecoration(labelText: 'Last Name'),
@@ -113,28 +130,14 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 10),
-                  // Date of Birth - with calendar picker
-                  InkWell(
-                    onTap: () => _selectDate(context), // Open date picker on tap
-                    child: IgnorePointer(
-                      child: TextFormField(
-                        controller: _dobController,
-                        decoration: const InputDecoration(
-                          labelText: 'Date of Birth',
-                          suffixIcon: Icon(Icons.calendar_today), // Add calendar icon
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your date of birth';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _dobController,
+                    decoration: const InputDecoration(labelText: 'Date of Birth'),
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
                   ),
-                  const SizedBox(height: 10),
-                  // Email
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _emailController,
                     decoration: const InputDecoration(labelText: 'Email'),
@@ -142,17 +145,17 @@ class _SignupPageState extends State<SignupPage> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      if (!RegExp(r'\S+@\S+\.\S+').hasMatch(value)) {
+                      // Improved email validation regex
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                         return 'Please enter a valid email address';
                       }
                       return null;
                     },
                   ),
-                  const SizedBox(height: 10),
-                  // Password
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: _obscurePassword, // Toggle password visibility
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       suffixIcon: IconButton(
@@ -173,11 +176,10 @@ class _SignupPageState extends State<SignupPage> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 10),
-                  // Confirm Password
+                  const SizedBox(height: 20),
                   TextFormField(
                     controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword, // Toggle confirm password visibility
+                    obscureText: _obscureConfirmPassword,
                     decoration: InputDecoration(
                       labelText: 'Confirm Password',
                       suffixIcon: IconButton(
@@ -202,6 +204,12 @@ class _SignupPageState extends State<SignupPage> {
                   ElevatedButton(
                     onPressed: _signup,
                     child: const Text('Sign Up'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Already have an account? Login here.'),
                   ),
                 ],
               ),

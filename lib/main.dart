@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:myfitness/pages/details/details.dart';
-import 'package:myfitness/pages/home/home.dart';
 import 'package:myfitness/navigation/records.dart';
 import 'package:myfitness/navigation/stats.dart';
 import 'package:myfitness/navigation/profile.dart';
 import 'package:myfitness/auth/login.dart';
 import 'package:myfitness/auth/signup.dart';
+import 'package:myfitness/pages/home/home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  await Firebase.initializeApp(); // Initialize Firebase
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive); // Set immersive mode
 
   runApp(const MyApp());
 }
@@ -37,33 +37,23 @@ class MyApp extends StatelessWidget {
         ),
       ),
       debugShowCheckedModeBanner: false,
-      home: HomeCheck(), // Authentication check widget
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.active) {
+            User? user = snapshot.data;
+            return user != null ? const HomePage() : const LoginPage(); // Show Home if logged in, otherwise Login
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
       routes: {
         '/details': (context) => const DetailsPage(),
         '/records': (context) => const Records(),
         '/stats': (context) => StatsPage(),
         '/profile': (context) => const ProfilePage(),
         '/signup': (context) => const SignupPage(),
-        '/login': (context) => const LoginPage(),
-      },
-    );
-  }
-}
-
-class HomeCheck extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.active) {
-          if (snapshot.hasData) {
-            return HomePage(); // Direct to HomePage if logged in
-          } else {
-            return const LoginPage(); // Go to LoginPage if not logged in
-          }
-        }
-        return const Center(child: CircularProgressIndicator());
+        // Removed '/home' since we are directly using HomePage as a stream in home
       },
     );
   }
