@@ -16,19 +16,31 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
 
   bool _obscurePassword = true;
+  String? _errorMessage;
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       try {
         await _auth.signInWithEmailAndPassword(
-          email: _emailController.text,
+          email: _emailController.text.trim(),
           password: _passwordController.text,
         );
         Navigator.pushReplacementNamed(context, '/'); // Navigate to Home
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Login Failed: ${e.toString()}'),
-        ));
+        setState(() {
+          // Set custom error message based on Firebase error
+          if (e is FirebaseAuthException) {
+            if (e.code == 'user-not-found') {
+              _errorMessage = 'No user found for that email.';
+            } else if (e.code == 'wrong-password') {
+              _errorMessage = 'Incorrect password. Please try again.';
+            } else {
+              _errorMessage = 'Login failed. Please try again.';
+            }
+          } else {
+            _errorMessage = 'An unknown error occurred.';
+          }
+        });
       }
     }
   }
@@ -85,6 +97,15 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
                 const SizedBox(height: 20),
+                // Display error message if exists
+                if (_errorMessage != null) 
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Text(
+                      _errorMessage!,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
                 ElevatedButton(
                   onPressed: _login,
                   child: const Text('Login'),

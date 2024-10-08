@@ -8,24 +8,17 @@ class DatabaseService {
   Future<String> addActivity(String name, String duration, String calories, String? selectedImage) async {
     User? user = FirebaseAuth.instance.currentUser; // Get the current user
     if (user != null) {
-      Map<String, dynamic> activityData = {
-        'name': name,
-        'duration': duration,
-        'calories': calories,
-        'timestamp': FieldValue.serverTimestamp(), // Store the current time
-      };
-
-      // Add 'image' only if selectedImage is not null
-      if (selectedImage != null && selectedImage.isNotEmpty) {
-        activityData['image'] = selectedImage;
-      }
-
       DocumentReference docRef = await _firestore
           .collection('users') // Reference to users collection
           .doc(user.uid) // Document for the current user
           .collection('activities') // Sub-collection for activities
-          .add(activityData); // Add the activity data
-
+          .add({
+        'name': name,
+        'duration': duration,
+        'calories': calories,
+        'image': selectedImage, // Add the image field
+        'timestamp': FieldValue.serverTimestamp(), // Store the current time
+      });
       return docRef.id; // Return the document ID
     } else {
       throw Exception("User not logged in"); // Handle case when user is not logged in

@@ -1,73 +1,123 @@
 import 'package:flutter/material.dart';
-// ignore: unused_import
-import 'package:intl/intl.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:myfitness/pages/home/widgets/header.dart';
-import 'package:myfitness/widgets/bottom_navigation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth for user identification
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
+import 'package:myfitness/pages/home/widgets/header.dart'; // Import the header
+import 'package:myfitness/widgets/bottom_navigation.dart'; // Import the bottom navigation
 
 class StatsPage extends StatefulWidget {
-  const StatsPage({super.key});
-
   @override
   _StatsPageState createState() => _StatsPageState();
 }
 
 class _StatsPageState extends State<StatsPage> {
-  late Map<DateTime, List<Map<String, dynamic>>> activitiesMap;
-  DateTime selectedDay = DateTime.now();
+  final Map<DateTime, List<dynamic>> _activities = {};
   final FirebaseAuth _auth = FirebaseAuth.instance; // Instance of FirebaseAuth
-  String? userId; // Current user's ID
+  int _selectedIndex = 2; // Set the selected index for bottom navigation
 
   @override
   void initState() {
     super.initState();
-    activitiesMap = {};
-    _fetchUserActivities(); // Fetch activities for the current user
+    _fetchActivities();
   }
 
-  Future<void> _fetchUserActivities() async {
-    // Get the current user's ID
+  Future<void> _fetchActivities() async {
     User? user = _auth.currentUser;
     if (user != null) {
-      userId = user.uid; // Store the current user's ID
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
           .collection('activities')
-          .where('userId', isEqualTo: userId) // Query activities based on user ID
           .get();
 
+      print('Number of activities fetched: ${snapshot.docs.length}');
+
       for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        DateTime date = (data['timestamp'] as Timestamp).toDate();
-        date = DateTime(date.year, date.month, date.day);
+        DateTime date = (doc['timestamp'] as Timestamp).toDate();
+        DateTime normalizedDate = DateTime(date.year, date.month, date.day);
 
-        String? caloriesString = data['calories'] as String?;
-        // ignore: unused_local_variable
-        int calories = caloriesString != null ? int.parse(caloriesString) : 0;
-
-        print('Fetched activity: $caloriesString calories on $date');
-
-        if (activitiesMap[date] == null) {
-          activitiesMap[date] = [];
+        if (_activities[normalizedDate] == null) {
+          _activities[normalizedDate] = [];
         }
-        activitiesMap[date]!.add(data);
+        _activities[normalizedDate]!.add(doc.data());
+
+        print('Activity on $normalizedDate: ${doc.data()}');
       }
 
-      setState(() {}); // Refresh the UI
+      print('Grouped activities: $_activities');
+
+      setState(() {});
     } else {
-      // Handle case where the user is not logged in
-      print('No user is currently logged in.');
+      print('No user is logged in.');
     }
   }
 
-  int _getTotalCaloriesForDay(DateTime day) {
-    DateTime normalizedDay = DateTime(day.year, day.month, day.day);
-    
-    return activitiesMap[normalizedDay]?.map((activity) {
-      String? caloriesString = activity['calories'] as String?;
-      return caloriesString != null ? int.parse(caloriesString) : 0;
-    }).fold(0, (a, b) => (a ?? 0) + b) ?? 0;
+  int _getTotalCaloriesForDate(DateTime date) {
+    final activitiesForDate = _activities[date];
+
+    if (activitiesForDate != null && activitiesForDate.isNotEmpty) {
+      return activitiesForDate.fold(0, (total, activity) {
+        print('Activity calories: ${activity['calories']}');
+        int calories = int.tryParse(activity['calories']?.toString() ?? '0') ?? 0;
+        return total + calories;
+      });
+    }
+
+    return 0; // Return 0 if no activities
+  }
+
+  String _formatDate(DateTime date) {
+    // Format the date as "8th October, 2024"
+    String day = DateFormat('d').format(date);
+    String month = DateFormat('MMMM').format(date);
+    String year = DateFormat('y').format(date);
+    return '$day${_getDaySuffix(int.parse(day))} $month, $year';
+  }
+
+  String _getDaySuffix(int day) {
+    // Determine the suffix for the day (st, nd, rd, th)
+    if (day >= 11 && day <= 13) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  }
+
+  void _showActivitiesForDate(BuildContext context, DateTime date) {
+    List<dynamic>? activities = _activities[date];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Activities on ${_formatDate(date)}'),
+          content: SizedBox(
+            height: 200, // Set a fixed height for the dialog
+            width: double.maxFinite, // Allow the dialog to be wide enough
+            child: activities != null && activities.isNotEmpty
+                ? ListView.builder(
+                    itemCount: activities.length,
+                    itemBuilder: (context, index) {
+                      var activity = activities[index];
+                      return ListTile(
+                        title: Text(activity['name']), // Display activity name
+                        subtitle: Text('Calories: ${activity['calories']}'), // Display calories
+                      );
+                    },
+                  )
+                : const Center(child: Text('No activities recorded for this day.')),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -75,182 +125,58 @@ class _StatsPageState extends State<StatsPage> {
     return Scaffold(
       body: Column(
         children: [
-          const AppHeader(),
+          const AppHeader(), // Include the header
           Expanded(
-            child: Column(
-              children: [
-                TableCalendar<Map<String, dynamic>>(
-                  firstDay: DateTime.utc(2020, 1, 1),
-                  lastDay: DateTime.utc(2030, 12, 31),
-                  focusedDay: selectedDay,
-                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      this.selectedDay = selectedDay;
-                    });
+            child: ListView.builder(
+              itemCount: _activities.keys.length,
+              itemBuilder: (context, index) {
+                DateTime date = _activities.keys.elementAt(index);
+                int totalCalories = _getTotalCaloriesForDate(date);
+                String formattedDate = _formatDate(date); // Get the formatted date
 
-                    int totalCalories = _getTotalCaloriesForDay(selectedDay);
-                    String celebrationMessage = totalCalories > 200
-                        ? "🎉 Congratulations on your hard work! You burned $totalCalories calories."
-                        : "Keep going! You burned $totalCalories calories.";
-
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text("Calories Burned"),
-                          content: Text(celebrationMessage),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: const Text('Close'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  calendarBuilders: CalendarBuilders(
-                    todayBuilder: (context, day, focusedDay) {
-                      final hasActivities = activitiesMap.containsKey(day);
-                      return Stack(
+                return GestureDetector(
+                  onTap: () => _showActivitiesForDate(context, date), // Show activities on tap
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Add margin for spacing
+                    child: ListTile(
+                      title: Center(child: Text(formattedDate)), // Center the date text
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center, // Center the subtitle content
                         children: [
-                          Container(
-                            margin: const EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              color: hasActivities ? Colors.green : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10.0),
+                          Text('Total Calories: $totalCalories', textAlign: TextAlign.center),
+                          const SizedBox(height: 8), // Add spacing
+                          if (totalCalories > 200) // Check calories threshold
+                            Text(
+                              'Congratulations 🎉',
+                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                              textAlign: TextAlign.center, // Center the congratulatory message
                             ),
-                            child: Center(
-                              child: Text(
-                                day.day.toString(),
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            left: 2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
                         ],
-                      );
-                    },
-                    defaultBuilder: (context, day, focusedDay) {
-                      final hasActivities = activitiesMap.containsKey(day);
-                      return Container(
-                        margin: const EdgeInsets.all(6.0),
-                        decoration: BoxDecoration(
-                          color: hasActivities ? Colors.green : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Center(
-                          child: Text(day.day.toString()),
-                        ),
-                      );
-                    },
-                    // Modify the selectedBuilder to show a small indicator
-                    selectedBuilder: (context, day, focusedDay) {
-                      return Stack(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.all(6.0),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Center(
-                              child: Text(day.day.toString()),
-                            ),
-                          ),
-                          Positioned(
-                            top: 2,
-                            right: 2,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: Colors.blue, // Color for the selected day indicator
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                      ),
+                    ),
                   ),
-                ),
-                // Key for understanding colors
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            color: Colors.green,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Recorded Activity'),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Today'),
-                        ],
-                      ),
-                      const SizedBox(width: 16),
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            color: Colors.blue,
-                          ),
-                          const SizedBox(width: 8),
-                          const Text('Selected Date'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
           BottomNavigation(
-            selectedIndex: 2,
+            selectedIndex: _selectedIndex,
             onItemTapped: (index) {
+              setState(() {
+                _selectedIndex = index; // Update selected index
+              });
               switch (index) {
                 case 0:
-                  Navigator.of(context).pushReplacementNamed('/');
+                  Navigator.of(context).pushReplacementNamed('/'); // Navigate to Home
                   break;
                 case 1:
-                  Navigator.of(context).pushReplacementNamed('/records');
+                  Navigator.of(context).pushReplacementNamed('/records'); // Navigate to Records
                   break;
                 case 2:
                   // Do nothing, already on Stats
                   break;
                 case 3:
-                  Navigator.of(context).pushReplacementNamed('/profile');
+                  Navigator.of(context).pushReplacementNamed('/profile'); // Navigate to Profile
                   break;
               }
             },
