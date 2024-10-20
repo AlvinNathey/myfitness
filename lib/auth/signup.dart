@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class SignupPage extends StatefulWidget {
-  const SignupPage({Key? key}) : super(key: key);
+  const SignupPage({super.key});
 
   @override
   _SignupPageState createState() => _SignupPageState();
@@ -17,7 +18,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
-  
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -39,10 +40,18 @@ class _SignupPageState extends State<SignupPage> {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text == _confirmPasswordController.text) {
         try {
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
+
+          // Save user details in Firestore
+          await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+            'firstName': _firstNameController.text,
+            'lastName': _lastNameController.text,
+            'dateOfBirth': _dobController.text,
+            'email': _emailController.text,
+          });
 
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
@@ -145,7 +154,6 @@ class _SignupPageState extends State<SignupPage> {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
                       }
-                      // Improved email validation regex
                       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                         return 'Please enter a valid email address';
                       }

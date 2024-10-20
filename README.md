@@ -4,6 +4,8 @@
 
 MyFitness is a Flutter-based fitness tracking application designed to help users manage their fitness activities, track their workouts, and stay motivated. The app leverages Firebase for authentication and data storage, providing a seamless user experience.
 
+[Download MyFitness APK for ease ](app/myfitnesss.apk)
+
 ## Screenshots
 
 ### Login Screen

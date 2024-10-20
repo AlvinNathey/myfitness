@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
             User? user = snapshot.data;
-            return user != null ? const HomePage() : const LoginPage(); // Show Home if logged in, otherwise Login
+            // Navigate to login page if user is not authenticated
+            return user == null ? const LoginPage() : const HomePage();
           }
           return const Center(child: CircularProgressIndicator());
         },
@@ -53,7 +54,8 @@ class MyApp extends StatelessWidget {
         '/stats': (context) => StatsPage(),
         '/profile': (context) => const ProfilePage(),
         '/signup': (context) => const SignupPage(),
-        // Removed '/home' since we are directly using HomePage as a stream in home
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const HomePage(),
       },
     );
   }
